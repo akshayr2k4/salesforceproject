@@ -1,0 +1,42 @@
+public class LaptopBookingHandler {
+
+    public static void sendEmailNotification(List<Laptop_Bookings__c> lapList) {
+        // Email list to hold all the emails to be sent
+        List<Messaging.SingleEmailMessage> emailList = new List<Messaging.SingleEmailMessage>();
+        Integer emailLimit = 10; // Set a limit for emails to send per execution
+        
+        // Loop through the list of Laptop_Bookings__c
+        for (Laptop_Bookings__c lap : lapList) {
+            // Check if the limit has been reached
+            if (emailList.size() >= emailLimit) {
+                break;
+            }
+            
+            // Prepare the email
+            Messaging.SingleEmailMessage email = new Messaging.SingleEmailMessage();
+            email.setToAddresses(new List<String>{lap.Email__c});
+            email.setSubject('Welcome to our company');
+            String body = 'Dear ' + lap.Name + ',\n';
+            body += 'Welcome to Laptop Rentals! We value you as a customer.\n';
+            body += 'Continue your journey with us for quality resources.\n';
+            body += 'Laptop Amount = ' + lap.Amount__c + '\n';
+            body += 'Core Type = ' + lap.core_type__c + '\n';
+            body += 'Laptop Type = ' + lap.Laptop_names__c + '\n';
+            email.setPlainTextBody(body);
+            
+            // Add the email to the list
+            emailList.add(email);
+        }
+
+        // Send the emails in bulk
+        if (!emailList.isEmpty()) {
+            try {
+                // Attempt to send the emails
+                Messaging.sendEmail(emailList);
+            } catch (Exception ex) {
+                // Log the exception if the email limit is exceeded
+                System.debug('Email sending failed: ' + ex.getMessage());
+            }
+        }
+    }
+}
